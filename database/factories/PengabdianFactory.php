@@ -1,23 +1,21 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Pengabdian;
+use App\Models\Dosen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pengabdian>
- */
 class PengabdianFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Pengabdian::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_dosen' => Dosen::factory(),
+            'judul' => $this->faker->sentence,
+            'tahun' => $this->faker->year,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Perwalian;
+use App\Models\Dosen;
+use App\Models\Mahasiswa;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Perwalian>
- */
 class PerwalianFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Perwalian::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_dosen' => Dosen::factory(),
+            'id_mahasiswa' => Mahasiswa::factory(),
+            'status_validasi' => $this->faker->randomElement(['Validasi', 'Belum Validasi']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

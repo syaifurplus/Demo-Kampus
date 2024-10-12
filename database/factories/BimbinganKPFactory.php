@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\BimbinganKP;
+use App\Models\Mahasiswa;
+use App\Models\Dosen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BimbinganKP>
- */
 class BimbinganKPFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = BimbinganKP::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_mahasiswa' => Mahasiswa::factory(),
+            'id_dosen' => Dosen::factory(),
+            'topik' => $this->faker->sentence,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

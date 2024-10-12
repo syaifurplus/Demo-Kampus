@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Penugasan;
+use App\Models\Kelompok;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Penugasan>
- */
 class PenugasanFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Penugasan::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_kelompok' => Kelompok::factory(),
+            'nama_tugas' => $this->faker->sentence,
+            'deskripsi' => $this->faker->paragraph,
+            'tenggat' => $this->faker->date(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -1,23 +1,24 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\IsianPenugasanMahasiswa;
+use App\Models\Penugasan;
+use App\Models\Mahasiswa;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\IsianPenugasanMahasiswa>
- */
 class IsianPenugasanMahasiswaFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = IsianPenugasanMahasiswa::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_penugasan' => Penugasan::factory(),
+            'id_mahasiswa' => Mahasiswa::factory(),
+            'jawaban' => $this->faker->paragraph,
+            'nilai' => $this->faker->randomFloat(2, 0, 100),
+            'tanggal_pengumpulan' => $this->faker->date(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

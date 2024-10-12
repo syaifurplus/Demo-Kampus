@@ -1,23 +1,21 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\BahanAjar;
+use App\Models\Kelompok;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BahanAjar>
- */
 class BahanAjarFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = BahanAjar::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_kelompok' => Kelompok::factory(),
+            'nama_bahan' => $this->faker->sentence,
+            'tipe_bahan' => $this->faker->randomElement(['Dokumen', 'Video', 'Lainnya']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

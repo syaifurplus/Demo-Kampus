@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Publikasi;
+use App\Models\Dosen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Publikasi>
- */
 class PublikasiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Publikasi::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_dosen' => Dosen::factory(),
+            'judul' => $this->faker->sentence,
+            'jurnal' => $this->faker->word,
+            'tahun' => $this->faker->year,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -1,23 +1,22 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Kelompok;
+use App\Models\MataKuliah;
+use App\Models\Dosen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Kelompok>
- */
 class KelompokFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Kelompok::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_matkul' => MataKuliah::factory(),
+            'id_dosen' => Dosen::factory(),
+            'nama_kelompok' => 'Kelompok ' . $this->faker->numberBetween(1, 10),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

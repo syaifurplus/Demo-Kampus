@@ -1,23 +1,23 @@
 <?php
 
-namespace Database\Factories;
-
+use App\Models\Absensi;
+use App\Models\Mahasiswa;
+use App\Models\Jadwal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Absensi>
- */
 class AbsensiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Absensi::class;
+
+    public function definition()
     {
         return [
-            //
+            'id_mahasiswa' => Mahasiswa::factory(),
+            'id_jadwal' => Jadwal::factory(),
+            'tanggal' => $this->faker->date(),
+            'status' => $this->faker->randomElement(['Hadir', 'Tidak Hadir']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }
