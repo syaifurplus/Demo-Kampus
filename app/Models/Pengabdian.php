@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Pengabdian extends Model
 {
     use HasFactory;
+
+    protected $table = 'pengabdian';
+
+    protected $fillable = [
+        'id_dosen', 'judul', 'tahun',
+    ];
+
+    // Relasi dengan Dosen
+    public function dosen()
+    {
+        return $this->belongsTo(Dosen::class, 'id_dosen');
+    }
 }

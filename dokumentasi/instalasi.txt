@@ -1,0 +1,5 @@
+composer install
+php artisan key:generate
+php artisan migrate --database=mysql --path=/database/migrations/siakad
+php artisan migrate --database=mysql2 --path=/database/migrations/lms
+php artisan db:seed
