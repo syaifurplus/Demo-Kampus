@@ -62,6 +62,20 @@ return [
             ]) : [],
         ],
 
+        'mysql2' => [
+            'driver' => 'mysql',
+            'host' => env('DB_LMS_HOST', '127.0.0.1'),
+            'port' => env('DB_LMS_PORT', '3306'),
+            'database' => env('DB_LMS_DATABASE', 'forge'),
+            'username' => env('DB_LMS_USERNAME', 'forge'),
+            'password' => env('DB_LMS_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
