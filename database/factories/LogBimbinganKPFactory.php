@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\LogBimbinganKP;
 use App\Models\BimbinganKP;
 use Illuminate\Database\Eloquent\Factories\Factory;

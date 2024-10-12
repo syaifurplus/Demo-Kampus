@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\Penugasan;
 use App\Models\Kelompok;
 use Illuminate\Database\Eloquent\Factories\Factory;

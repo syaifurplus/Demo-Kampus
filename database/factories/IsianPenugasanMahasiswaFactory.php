@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\IsianPenugasanMahasiswa;
 use App\Models\Penugasan;
 use App\Models\Mahasiswa;

@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\Penelitian;
 use App\Models\Dosen;
 use Illuminate\Database\Eloquent\Factories\Factory;

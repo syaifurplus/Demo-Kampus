@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\Jadwal;
 use App\Models\MataKuliah;
 use App\Models\Dosen;

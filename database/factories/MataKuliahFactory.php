@@ -1,5 +1,6 @@
 <?php
 
+namespace Database\Factories;
 use App\Models\MataKuliah;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
