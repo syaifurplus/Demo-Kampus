@@ -1,5 +1,14 @@
 composer install
+mp .env.example .env
+    DB_LMS_CONNECTION=mysql2
+    DB_LMS_HOST=127.0.0.1
+    DB_LMS_PORT=3306
+    DB_LMS_DATABASE=kampusmu-lms
+    DB_LMS_USERNAME=root
+    DB_LMS_PASSWORD=admin123
 php artisan key:generate
 php artisan migrate:refresh --database=mysql --path=/database/migrations/siakad
 php artisan migrate:refresh --database=mysql2 --path=/database/migrations/lms
+php artisan migrate:refresh
 php artisan db:seed
+php artisan optimize:clear
