@@ -58,25 +58,23 @@ class SimulasiPerkuliahanSeeder extends Seeder
                 // Langkah 4: Buat Nilai untuk Setiap Mahasiswa di Kelompok yang Dibuat
                 $kelompokCollection = collect($kelompokList);
 
-                $kelompokCollection->each(function ($kelompok) use ($mahasiswa, $jadwalList) {
+                $kelompokCollection->each(function ($kelompok) use ($mahasiswa) {
                     $mahasiswaGroup = $mahasiswa->random(rand(3, 7)); // Pilih mahasiswa acak
 
-                    $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok, $jadwalList) {
+                    $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok) {
                         // Buat nilai mahasiswa di kelompok tersebut
                         Nilai::factory()->create([
                             'id_mahasiswa' => $mahasiswa->id,
                             'id_kelompok' => $kelompok->id,
                         ]);
 
-                        // Buat relasi jadwal dengan mahasiswa
-                        foreach ($jadwalList as $jadwal) {
-                            DB::table('jadwal_mahasiswa')->insert([
-                                'id_mahasiswa' => $mahasiswa->id,
-                                'id_jadwal' => $jadwal->id,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                        }
+                        // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
+                        DB::table('jadwal_mahasiswa')->insert([
+                            'id_mahasiswa' => $mahasiswa->id,
+                            'id_kelompok' => $kelompok->id, // Simpan id_kelompok di tabel jadwal_mahasiswa
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     });
                 });
             }

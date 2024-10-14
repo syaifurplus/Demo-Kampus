@@ -25,13 +25,6 @@ class Kelompok extends Model
 
     public function mahasiswa()
     {
-        return $this->hasManyThrough(
-            Mahasiswa::class,  // Target model Mahasiswa
-            JadwalMahasiswa::class,  // Model perantara JadwalMahasiswa (pivot)
-            'id_kelompok',  // Foreign key di tabel jadwal_mahasiswa (ke kelompok)
-            'id',  // Foreign key di tabel mahasiswa
-            'id',  // Primary key di tabel kelompok
-            'id_mahasiswa'  // Foreign key di tabel jadwal_mahasiswa
-        );
+        return $this->hasMany(JadwalMahasiswa::class, 'id_mahasiswa');
     }
 }

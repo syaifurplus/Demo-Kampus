@@ -24,12 +24,12 @@ class DosenController extends Controller
             'mataKuliah.kelompok.jadwal' => function ($query) {
                 $query->select('id', 'id_kelompok', 'hari', 'jam_mulai', 'jam_selesai'); // Pilih kolom dari Jadwal
             },
-            // 'mataKuliah.kelompok.mahasiswa',
+            'mataKuliah.kelompok.mahasiswa',
+            // 'mataKuliah.kelompok.mahasiswa.nilai',
+            // 'mataKuliah.kelompok.mahasiswa.absensi',
         ])->get();
 
 
-            // 'mataKuliah.kelompok.mahasiswa.nilai',
-            // 'mataKuliah.kelompok.mahasiswa.absensi',
 
         return response()->json([
             'status' => true,

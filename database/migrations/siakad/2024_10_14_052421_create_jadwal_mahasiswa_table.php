@@ -11,7 +11,7 @@ class CreateJadwalMahasiswaTable extends Migration
         Schema::create('jadwal_mahasiswa', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_mahasiswa')->constrained('mahasiswa')->onDelete('cascade');
-            $table->foreignId('id_jadwal')->constrained('jadwal')->onDelete('cascade');
+            $table->foreignId('id_kelompok')->constrained('kelompok')->onDelete('cascade');
             $table->timestamps();
         });
     }

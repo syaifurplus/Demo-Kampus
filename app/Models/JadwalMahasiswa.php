@@ -16,9 +16,9 @@ class JadwalMahasiswa extends Model
         'id_jadwal',
     ];
 
-    // Relasi ke Mahasiswa
-    public function mahasiswa()
+    // Relasi ke Kelompok
+    public function kelompok()
     {
-        return $this->belongsTo(Mahasiswa::class, 'id_mahasiswa');
+        return $this->belongsTo(Kelompok::class, 'id_kelompok');
     }
 }
