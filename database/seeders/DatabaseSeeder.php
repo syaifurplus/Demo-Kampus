@@ -15,24 +15,25 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            DosenSeeder::class,
-            MahasiswaSeeder::class,
-            MataKuliahSeeder::class,
-            KelompokSeeder::class,
-            JadwalSeeder::class,
-            NilaiSeeder::class,
-            AbsensiSeeder::class,
-            PerwalianSeeder::class,
-            BimbinganMahasiswaSeeder::class,
-            LogBimbinganMahasiswaSeeder::class,
-            BimbinganKPSeeder::class,
-            LogBimbinganKPSeeder::class,
-            PengabdianSeeder::class,
-            PublikasiSeeder::class,
-            PenelitianSeeder::class,
-            BahanAjarSeeder::class,
-            PenugasanSeeder::class,
-            IsianPenugasanMahasiswaSeeder::class,
+            SimulasiPerkuliahanSeeder::class
+            // DosenSeeder::class,
+            // MahasiswaSeeder::class,
+            // MataKuliahSeeder::class,
+            // KelompokSeeder::class,
+            // JadwalSeeder::class,
+            // NilaiSeeder::class,
+            // AbsensiSeeder::class,
+            // PerwalianSeeder::class,
+            // BimbinganMahasiswaSeeder::class,
+            // LogBimbinganMahasiswaSeeder::class,
+            // BimbinganKPSeeder::class,
+            // LogBimbinganKPSeeder::class,
+            // PengabdianSeeder::class,
+            // PublikasiSeeder::class,
+            // PenelitianSeeder::class,
+            // BahanAjarSeeder::class,
+            // PenugasanSeeder::class,
+            // IsianPenugasanMahasiswaSeeder::class,
         ]);
     }
 

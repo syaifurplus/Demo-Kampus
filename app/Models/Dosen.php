@@ -14,46 +14,17 @@ class Dosen extends Model
     protected $fillable = [
         'nama', 'nip', 'email',
     ];
-
-    // Relasi dengan Kelompok
-    public function kelompok()
+    
+    public function mataKuliah()
     {
-        return $this->hasMany(Kelompok::class, 'id_dosen');
+        return $this->hasManyThrough(
+            MataKuliah::class,         // Model yang dituju
+            Kelompok::class,           // Model perantara
+            'id_dosen',                // Foreign key di tabel kelompok
+            'id',                      // Foreign key di tabel mata kuliah
+            'id',                      // Primary key di dosen
+            'id_matkul'                // Foreign key di kelompok yang merujuk ke mata kuliah
+        );
     }
 
-    // Relasi dengan Perwalian
-    public function perwalian()
-    {
-        return $this->hasMany(Perwalian::class, 'id_dosen');
-    }
-
-    // Relasi dengan Bimbingan Mahasiswa
-    public function bimbinganMahasiswa()
-    {
-        return $this->hasMany(BimbinganMahasiswa::class, 'id_dosen');
-    }
-
-    // Relasi dengan Bimbingan KP
-    public function bimbinganKP()
-    {
-        return $this->hasMany(BimbinganKP::class, 'id_dosen');
-    }
-
-    // Relasi dengan Pengabdian
-    public function pengabdian()
-    {
-        return $this->hasMany(Pengabdian::class, 'id_dosen');
-    }
-
-    // Relasi dengan Publikasi
-    public function publikasi()
-    {
-        return $this->hasMany(Publikasi::class, 'id_dosen');
-    }
-
-    // Relasi dengan Penelitian
-    public function penelitian()
-    {
-        return $this->hasMany(Penelitian::class, 'id_dosen');
-    }
 }

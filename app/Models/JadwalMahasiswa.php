@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Absensi extends Model
+class JadwalMahasiswa extends Model
 {
     use HasFactory;
 
-    protected $table = 'absensi';
+    protected $table = 'jadwal_mahasiswa';
 
     protected $fillable = [
-        'id_mahasiswa', 'id_jadwal', 'tanggal', 'status',
+        'id_mahasiswa',
+        'id_jadwal',
     ];
 
     // Relasi ke Mahasiswa

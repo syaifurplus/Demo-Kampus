@@ -1,3 +1,5 @@
+-- ======================= Master =============================================
+
 -- Tabel dosen
 CREATE TABLE dosen (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -27,6 +29,8 @@ CREATE TABLE mata_kuliah (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+
 
 -- Tabel kelompok
 CREATE TABLE kelompok (

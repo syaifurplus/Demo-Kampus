@@ -15,15 +15,10 @@ class MataKuliah extends Model
         'kode_matkul', 'nama_matkul', 'sks',
     ];
 
-    // Relasi dengan Kelompok
+    // Relasi ke Kelompok
     public function kelompok()
     {
         return $this->hasMany(Kelompok::class, 'id_matkul');
     }
 
-    // Relasi dengan Jadwal
-    public function jadwal()
-    {
-        return $this->hasMany(Jadwal::class, 'id_matkul');
-    }
 }

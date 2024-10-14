@@ -11,43 +11,27 @@ class Kelompok extends Model
 
     protected $table = 'kelompok';
 
-    protected $fillable = [
-        'id_matkul', 'id_dosen', 'nama_kelompok',
-    ];
-
-    // Relasi dengan MataKuliah
+    // Relasi ke MataKuliah
     public function mataKuliah()
     {
         return $this->belongsTo(MataKuliah::class, 'id_matkul');
     }
 
-    // Relasi dengan Dosen
-    public function dosen()
-    {
-        return $this->belongsTo(Dosen::class, 'id_dosen');
-    }
-
-    // Relasi dengan Jadwal
+    // Relasi ke Jadwal
     public function jadwal()
     {
         return $this->hasMany(Jadwal::class, 'id_kelompok');
     }
 
-    // Relasi dengan Nilai
-    public function nilai()
+    public function mahasiswa()
     {
-        return $this->hasMany(Nilai::class, 'id_kelompok');
-    }
-
-    // Relasi dengan Bahan Ajar
-    public function bahanAjar()
-    {
-        return $this->hasMany(BahanAjar::class, 'id_kelompok');
-    }
-
-    // Relasi dengan Penugasan
-    public function penugasan()
-    {
-        return $this->hasMany(Penugasan::class, 'id_kelompok');
+        return $this->hasManyThrough(
+            Mahasiswa::class,  // Target model Mahasiswa
+            JadwalMahasiswa::class,  // Model perantara JadwalMahasiswa (pivot)
+            'id_kelompok',  // Foreign key di tabel jadwal_mahasiswa (ke kelompok)
+            'id',  // Foreign key di tabel mahasiswa
+            'id',  // Primary key di tabel kelompok
+            'id_mahasiswa'  // Foreign key di tabel jadwal_mahasiswa
+        );
     }
 }

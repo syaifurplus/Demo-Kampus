@@ -15,15 +15,9 @@ class Nilai extends Model
         'id_mahasiswa', 'id_kelompok', 'nilai_uts', 'nilai_uas', 'nilai_tugas_akhir',
     ];
 
-    // Relasi dengan Mahasiswa
+    // Relasi ke Mahasiswa
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'id_mahasiswa');
-    }
-
-    // Relasi dengan Kelompok
-    public function kelompok()
-    {
-        return $this->belongsTo(Kelompok::class, 'id_kelompok');
     }
 }

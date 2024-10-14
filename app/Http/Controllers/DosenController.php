@@ -15,19 +15,28 @@ class DosenController extends Controller
     {
         // Ambil semua dosen beserta relasinya
         $dosen = Dosen::with([
-            'kelompok',             // Relasi ke Kelompok
-            'kelompok.mataKuliah',   // Relasi Kelompok -> MataKuliah
-            'perwalian',            // Relasi ke Perwalian
-            'bimbinganMahasiswa',    // Relasi ke Bimbingan Mahasiswa
-            'bimbinganKP',           // Relasi ke Bimbingan KP
-            'pengabdian',            // Relasi ke Pengabdian
-            'publikasi',             // Relasi ke Publikasi
-            'penelitian',            // Relasi ke Penelitian
+            'mataKuliah' => function ($query) {
+                $query->select('mata_kuliah.id', 'nama_matkul', 'sks'); // Pilih kolom dari MataKuliah
+            },
+            'mataKuliah.kelompok' => function ($query) {
+                $query->select('id', 'id_matkul', 'nama_kelompok'); // Pilih kolom dari Kelompok
+            },
+            'mataKuliah.kelompok.jadwal' => function ($query) {
+                $query->select('id', 'id_kelompok', 'hari', 'jam_mulai', 'jam_selesai'); // Pilih kolom dari Jadwal
+            },
+            // 'mataKuliah.kelompok.mahasiswa',
         ])->get();
+
+
+            // 'mataKuliah.kelompok.mahasiswa.nilai',
+            // 'mataKuliah.kelompok.mahasiswa.absensi',
 
         return response()->json([
             'status' => true,
-            'message' => 'Daftar dosen beserta relasi-relasinya berhasil diambil',
+            'message' => 'Daftar Dosen: Matakuliah 
+                            \n Matakuliah: Kelompok
+                            \n Kelompok: Jadwal, Mahasiswa
+                            \n Mahasiswa: Nilai, Absensi',
             'data' => $dosen
         ]);
     }

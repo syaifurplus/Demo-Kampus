@@ -13,16 +13,17 @@ class JadwalFactory extends Factory
 
     public function definition()
     {
+        // Array berisi nama-nama hari kerja
+        $weekdays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+
         return [
             'id_matkul' => MataKuliah::factory(),
             'id_dosen' => Dosen::factory(),
             'id_kelompok' => Kelompok::factory(),
-            'hari' => $this->faker->dayOfWeek,
-            'jam_mulai' => $this->faker->time(),
-            'jam_selesai' => $this->faker->time(),
-            'ruang' => 'Ruang ' . $this->faker->numberBetween(1, 20),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'hari' => $this->faker->randomElement($weekdays),  // Memilih hari kerja secara acak
+            'jam_mulai' => $this->faker->time('H:i:s', '08:00:00'),
+            'jam_selesai' => $this->faker->time('H:i:s', '21:00:00'),
+            'ruang' => 'Ruang ' . $this->faker->randomNumber(3),
         ];
     }
 }
