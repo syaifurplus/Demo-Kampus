@@ -10,7 +10,11 @@ use App\Models\Kelompok;
 use App\Models\Jadwal;
 use App\Models\Nilai;
 use App\Models\Absensi;
+use App\Models\Publikasi;
+use App\Models\Penelitian;
+use App\Models\Pengabdian;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SimulasiPerkuliahanSeeder extends Seeder
 {
@@ -23,6 +27,21 @@ class SimulasiPerkuliahanSeeder extends Seeder
 
         // Langkah 2: Batasi Dosen Maksimal 16 SKS
         $dosen->each(function ($dosen) use ($mataKuliah, $mahasiswa) {
+            // Buat 3 publikasi untuk setiap dosen
+            Publikasi::factory()->count(3)->create([
+                'id_dosen' => $dosen->id,
+            ]);
+
+            // Buat 2 penelitian untuk setiap dosen
+            Penelitian::factory()->count(2)->create([
+                'id_dosen' => $dosen->id,
+            ]);
+
+            // Buat 1 pengabdian untuk setiap dosen
+            Pengabdian::factory()->create([
+                'id_dosen' => $dosen->id,
+            ]);
+            
             $totalSKS = 0;
             $kelompokList = [];
 
@@ -82,12 +101,20 @@ class SimulasiPerkuliahanSeeder extends Seeder
 
         // Langkah 5: Buat Absensi untuk Setiap Mahasiswa dan Jadwal yang Ada
         $mahasiswa->each(function ($mahasiswa) {
-            $jadwal = Jadwal::inRandomOrder()->first(); // Ambil jadwal acak
-            Absensi::factory()->create([
-                'id_mahasiswa' => $mahasiswa->id,
-                'id_jadwal' => $jadwal->id,
-                'tanggal' => now(),
-            ]);
+            // Ambil jadwal acak
+            $jadwal = Jadwal::inRandomOrder()->first(); 
+        
+            // Mulai dari tanggal tertentu, misalnya 1 Januari 2021
+            $startDate = Carbon::create(2021, 1, 1);
+        
+            // Loop untuk membuat absensi 5 hingga 10 kali untuk tiap mahasiswa
+            for ($i = 0; $i < rand(5, 10); $i++) {
+                Absensi::factory()->create([
+                    'id_mahasiswa' => $mahasiswa->id,
+                    'id_jadwal' => $jadwal->id,
+                    'tanggal' => $startDate->copy()->addWeeks($i), // Tambahkan minggu untuk setiap loop
+                ]);
+            }
         });
     }
 }

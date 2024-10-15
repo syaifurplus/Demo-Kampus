@@ -25,18 +25,55 @@ class DosenController extends Controller
                         $join->on('nilai.id_kelompok', '=', 'kelompok.id')
                             ->on('nilai.id_mahasiswa', '=', 'mahasiswa.id');
                     })
-                    ->join('absensi', 'absensi.id_jadwal', '=', 'jadwal.id')
+                    ->join('absensi', function($join) {
+                        $join->on('absensi.id_jadwal', '=', 'jadwal.id')
+                            ->on('absensi.id_mahasiswa', '=', 'mahasiswa.id');
+                    })
+                    // Join Publikasi, Penelitian, dan Pengabdian
+                    ->leftJoin('publikasi', 'publikasi.id_dosen', '=', 'dosen.id')
+                    ->leftJoin('penelitian', 'penelitian.id_dosen', '=', 'dosen.id')
+                    ->leftJoin('pengabdian', 'pengabdian.id_dosen', '=', 'dosen.id')
                     ->select(
                         'dosen.id as dosen_id', 'dosen.nama as dosen_nama', 'dosen.nip',
                         'mata_kuliah.id as matkul_id', 'mata_kuliah.nama_matkul', 'mata_kuliah.sks',
                         'kelompok.id as kelompok_id', 'kelompok.nama_kelompok',
                         'mahasiswa.id as mahasiswa_id', 'mahasiswa.nama as mahasiswa_nama', 'mahasiswa.nim',
-                        'nilai.nilai_uas', 'absensi.tanggal', 'absensi.status'
+                        'nilai.nilai_tugas_akhir', 'nilai.nilai_uts', 'nilai.nilai_uas', 
+                        'absensi.tanggal', 'absensi.status',
+                        'publikasi.judul as publikasi_judul', 'publikasi.tahun as publikasi_tahun', 'publikasi.jurnal as publikasi_jurnal',
+                        'penelitian.judul as penelitian_judul', 'penelitian.tahun as penelitian_tahun',
+                        'pengabdian.judul as pengabdian_judul', 'pengabdian.tahun as pengabdian_tahun'
                     )
                     ->get();
 
 
+
         $dosenData = $results->groupBy('dosen_id')->map(function ($dosenGroup) {
+            // Ambil publikasi beserta tahun
+            $publikasi = $dosenGroup->map(function ($item) {
+                return [
+                    'judul' => $item->publikasi_judul,
+                    'jurnal' => $item->publikasi_jurnal,
+                    'tahun' => $item->publikasi_tahun,
+                ];
+            })->unique()->filter()->values();
+        
+            // Ambil penelitian beserta tahun
+            $penelitian = $dosenGroup->map(function ($item) {
+                return [
+                    'judul' => $item->penelitian_judul,
+                    'tahun' => $item->penelitian_tahun,
+                ];
+            })->unique()->filter()->values();
+        
+            // Ambil pengabdian beserta tahun
+            $pengabdian = $dosenGroup->map(function ($item) {
+                return [
+                    'judul' => $item->pengabdian_judul,
+                    'tahun' => $item->pengabdian_tahun,
+                ];
+            })->unique()->filter()->values();
+        
             // Mapping mata kuliah
             $mataKuliahData = $dosenGroup->groupBy('matkul_id')->map(function ($matkulGroup) {
                 // Mapping kelompok
@@ -46,6 +83,8 @@ class DosenController extends Controller
                         // Mapping nilai dan absensi untuk mahasiswa
                         $nilai = $mahasiswaGroup->map(function ($item) {
                             return [
+                                'nilai_tugas_akhir' => $item->nilai_tugas_akhir,
+                                'nilai_uts' => $item->nilai_uts,
                                 'nilai_uas' => $item->nilai_uas,
                             ];
                         })->first();
@@ -55,7 +94,7 @@ class DosenController extends Controller
                                 'tanggal' => $item->tanggal,
                                 'status'  => $item->status,
                             ];
-                        });
+                        })->unique('tanggal')->sortBy('tanggal'); // Pastikan absensi unik dan terurut
         
                         return [
                             'id' => $mahasiswaGroup->first()->mahasiswa_id,
@@ -85,11 +124,17 @@ class DosenController extends Controller
                 'id' => $dosenGroup->first()->dosen_id,
                 'nama' => $dosenGroup->first()->dosen_nama,
                 'nip' => $dosenGroup->first()->nip,
+                'publikasi' => $publikasi->toArray(),
+                'penelitian' => $penelitian->toArray(),
+                'pengabdian' => $pengabdian->toArray(),
                 'mata_kuliah' => $mataKuliahData->values()->toArray(),
             ];
         });
         
         return $dosenData->values()->toArray();
+                    
+                    
+                    
         
 
 
