@@ -10,7 +10,6 @@ use App\Models\Kelompok;
 use App\Models\Jadwal;
 use App\Models\Nilai;
 use App\Models\Absensi;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class SimulasiPerkuliahanSeeder extends Seeder
@@ -27,21 +26,14 @@ class SimulasiPerkuliahanSeeder extends Seeder
             $totalSKS = 0;
             $kelompokList = [];
 
-            // Membuat array untuk menyimpan id_matkul yang sudah diambil oleh dosen
-            $mataKuliahDosen = [];
-
             while ($totalSKS < 16) {
-                // Ambil mata kuliah acak yang belum diambil oleh dosen
-                $matkul = $mataKuliah->whereNotIn('id', $mataKuliahDosen)->random();
+                $matkul = $mataKuliah->random(); // Ambil mata kuliah acak
                 $sks = $matkul->sks;
 
                 // Pastikan total SKS tidak melebihi 16
                 if (($totalSKS + $sks) > 16) {
                     break;
                 }
-
-                // Simpan id mata kuliah yang sudah diambil oleh dosen
-                $mataKuliahDosen[] = $matkul->id;
 
                 // Buat kelompok untuk dosen dan mata kuliah
                 $kelompok = Kelompok::factory()->create([
@@ -57,28 +49,24 @@ class SimulasiPerkuliahanSeeder extends Seeder
                 // Jika 4 SKS, buat 2 jadwal
                 $jumlahJadwal = $sks == 4 ? 2 : 1;
 
-                Jadwal::factory()->count($jumlahJadwal)->create([
+                $jadwalList = Jadwal::factory()->count($jumlahJadwal)->create([
                     'id_matkul' => $kelompok->id_matkul,
                     'id_dosen' => $kelompok->id_dosen,
                     'id_kelompok' => $kelompok->id,
                 ]);
 
-                // Langkah 4: Buat Nilai dan Relasi untuk Setiap Mahasiswa di Kelompok yang Dibuat
-                $mataKuliahMahasiswa = []; // Menyimpan mata kuliah yang sudah diambil oleh mahasiswa
+                // Langkah 4: Buat Nilai untuk Setiap Mahasiswa di Kelompok yang Dibuat
+                $kelompokCollection = collect($kelompokList);
 
-                $mahasiswaGroup = $mahasiswa->random(rand(3, 7)); // Pilih mahasiswa acak
+                $kelompokCollection->each(function ($kelompok) use ($mahasiswa) {
+                    $mahasiswaGroup = $mahasiswa->random(rand(3, 7)); // Pilih mahasiswa acak
 
-                $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok, &$mataKuliahMahasiswa) {
-                    // Cek apakah mahasiswa sudah mengambil mata kuliah ini
-                    if (!in_array($kelompok->id_matkul, $mataKuliahMahasiswa)) {
+                    $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok) {
                         // Buat nilai mahasiswa di kelompok tersebut
                         Nilai::factory()->create([
                             'id_mahasiswa' => $mahasiswa->id,
                             'id_kelompok' => $kelompok->id,
                         ]);
-
-                        // Simpan mata kuliah yang sudah diambil mahasiswa
-                        $mataKuliahMahasiswa[] = $kelompok->id_matkul;
 
                         // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
                         DB::table('jadwal_mahasiswa')->insert([
@@ -87,30 +75,19 @@ class SimulasiPerkuliahanSeeder extends Seeder
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
-                    }
+                    });
                 });
             }
         });
 
         // Langkah 5: Buat Absensi untuk Setiap Mahasiswa dan Jadwal yang Ada
         $mahasiswa->each(function ($mahasiswa) {
-            // Ambil jadwal acak
-            $jadwal = Jadwal::inRandomOrder()->first(); 
-
-            // Tentukan berapa kali mahasiswa ini akan melakukan absensi (antara 5 hingga 10 kali)
-            $jumlahAbsensi = rand(5, 10);
-
-            // Buat tanggal absensi setiap minggu dari hari ini
-            $startDate = Carbon::now()->startOfWeek(); // Mulai dari awal minggu ini
-
-            for ($i = 0; $i < $jumlahAbsensi; $i++) {
-                // Tambahkan absensi setiap minggu
-                Absensi::factory()->create([
-                    'id_mahasiswa' => $mahasiswa->id,
-                    'id_jadwal' => $jadwal->id,
-                    'tanggal' => $startDate->copy()->addWeeks($i), // Tanggal absensi setiap minggu
-                ]);
-            }
+            $jadwal = Jadwal::inRandomOrder()->first(); // Ambil jadwal acak
+            Absensi::factory()->create([
+                'id_mahasiswa' => $mahasiswa->id,
+                'id_jadwal' => $jadwal->id,
+                'tanggal' => now(),
+            ]);
         });
     }
 }
