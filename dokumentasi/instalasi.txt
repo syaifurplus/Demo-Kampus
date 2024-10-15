@@ -1,5 +1,5 @@
 composer install
-mp .env.example .env
+cp .env.example .env
     DB_LMS_CONNECTION=mysql2
     DB_LMS_HOST=127.0.0.1
     DB_LMS_PORT=3306
