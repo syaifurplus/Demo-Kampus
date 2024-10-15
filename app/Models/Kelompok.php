@@ -25,6 +25,8 @@ class Kelompok extends Model
 
     public function mahasiswa()
     {
-        return $this->hasMany(JadwalMahasiswa::class, 'id_mahasiswa');
+        // return $this->hasMany(JadwalMahasiswa::class, 'id_mahasiswa');
+        return $this->belongsToMany(Mahasiswa::class, 'jadwal_mahasiswa', 'id_kelompok', 'id_mahasiswa')
+                    ->withPivot('id_kelompok', 'id_mahasiswa');
     }
 }
