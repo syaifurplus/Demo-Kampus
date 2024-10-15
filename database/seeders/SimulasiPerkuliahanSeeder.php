@@ -24,7 +24,6 @@ class SimulasiPerkuliahanSeeder extends Seeder
         // Langkah 2: Batasi Dosen Maksimal 16 SKS
         $dosen->each(function ($dosen) use ($mataKuliah, $mahasiswa) {
             $totalSKS = 0;
-            $kelompokList = [];
 
             while ($totalSKS < 16) {
                 $matkul = $mataKuliah->random(); // Ambil mata kuliah acak
@@ -41,7 +40,6 @@ class SimulasiPerkuliahanSeeder extends Seeder
                     'id_matkul' => $matkul->id,
                 ]);
 
-                $kelompokList[] = $kelompok;
                 $totalSKS += $sks;
 
                 // Langkah 3: Buat Jadwal sesuai dengan jumlah SKS
@@ -49,33 +47,32 @@ class SimulasiPerkuliahanSeeder extends Seeder
                 // Jika 4 SKS, buat 2 jadwal
                 $jumlahJadwal = $sks == 4 ? 2 : 1;
 
-                $jadwalList = Jadwal::factory()->count($jumlahJadwal)->create([
+                Jadwal::factory()->count($jumlahJadwal)->create([
                     'id_matkul' => $kelompok->id_matkul,
                     'id_dosen' => $kelompok->id_dosen,
                     'id_kelompok' => $kelompok->id,
                 ]);
 
-                // Langkah 4: Buat Nilai untuk Setiap Mahasiswa di Kelompok yang Dibuat
-                $kelompokCollection = collect($kelompokList);
+                // Langkah 4: Buat Nilai dan Relasi untuk Setiap Mahasiswa di Kelompok yang Dibuat
+                $mahasiswaGroup = $mahasiswa->random(rand(3, 7)); // Pilih mahasiswa acak
 
-                $kelompokCollection->each(function ($kelompok) use ($mahasiswa) {
-                    $mahasiswaGroup = $mahasiswa->random(rand(3, 7)); // Pilih mahasiswa acak
-
-                    $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok) {
+                $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok) {
+                    // Cek apakah nilai sudah ada untuk mahasiswa ini dalam kelompok yang sama
+                    if (!DB::table('nilai')->where('id_mahasiswa', $mahasiswa->id)->where('id_kelompok', $kelompok->id)->exists()) {
                         // Buat nilai mahasiswa di kelompok tersebut
                         Nilai::factory()->create([
                             'id_mahasiswa' => $mahasiswa->id,
                             'id_kelompok' => $kelompok->id,
                         ]);
+                    }
 
-                        // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
-                        DB::table('jadwal_mahasiswa')->insert([
-                            'id_mahasiswa' => $mahasiswa->id,
-                            'id_kelompok' => $kelompok->id, // Simpan id_kelompok di tabel jadwal_mahasiswa
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    });
+                    // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
+                    DB::table('jadwal_mahasiswa')->insert([
+                        'id_mahasiswa' => $mahasiswa->id,
+                        'id_kelompok' => $kelompok->id, // Simpan id_kelompok di tabel jadwal_mahasiswa
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
                 });
             }
         });
