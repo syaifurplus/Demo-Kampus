@@ -1,0 +1,59 @@
+Dosen
+	- Pengabdian
+	- Publikasi
+	- Penelitian
+
+Dosen (present)
+	- Mata Kuliah
+		- Kelompok
+			- Nilai
+				- Mahasiswa (tugas_akhir, uts, uas)
+			- Jadwal
+				- Mahasiswa
+					- Absensi
+			- Jadwal
+				- Mahasiswa
+					- Absensi
+
+Dosen
+	- Perwalian
+
+Dosen
+	- Bimbingan Skripsi
+		- Log
+	- Bimbingan KP
+		- Log
+
+Dosen
+	- Mata Kuliah
+		- Kelompok
+			- minggu
+				- bahan ajar
+				- penugasan
+					- mahasiswa
+						- pengisian 
+
+========================================================						
+Dosen (lalu)
+	- Periode 20231
+		- Mata Kuliah
+			- Kelompok
+				- Nilai
+					- Mahasiswa (tugas_akhir, uts, uas)
+				- Jadwal
+					- Mahasiswa
+						- Absensi
+				- Jadwal
+					- Mahasiswa
+						- Absensi
+	- Periode 20232
+		- Mata Kuliah
+			- Kelompok
+				- Nilai
+					- Mahasiswa (tugas_akhir, uts, uas)
+				- Jadwal
+					- Mahasiswa
+						- Absensi
+				- Jadwal
+					- Mahasiswa
+						- Absensi
