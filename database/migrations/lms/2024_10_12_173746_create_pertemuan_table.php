@@ -8,18 +8,16 @@ class CreateBahanAjarTable extends Migration
 {
     public function up()
     {
-        Schema::create('bahan_ajar', function (Blueprint $table) {
+        Schema::create('pertemuan', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_kelompok');
-            $table->unsignedBigInteger('id_pertemuan');
-            $table->string('nama_bahan');
-            $table->enum('tipe_bahan', ['Dokumen', 'Video', 'Lainnya']);
+            $table->string('minggu');
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('bahan_ajar');
+        Schema::dropIfExists('pertemuan');
     }
 }

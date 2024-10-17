@@ -10,6 +10,7 @@ class CreateIsianPenugasanMahasiswaTable extends Migration
     {
         Schema::create('isian_penugasan_mahasiswa', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('id_pertemuan');
             $table->unsignedBigInteger('id_penugasan');
             $table->unsignedBigInteger('id_mahasiswa');
             $table->text('jawaban');
