@@ -185,7 +185,7 @@ class SimulasiPerkuliahanSeeder extends Seeder
                 $bimbinganId = BimbinganMahasiswa::insertGetId([
                     'id_dosen' => $dosen->id,
                     'id_mahasiswa' => $mhs->id,
-                    'topik' => 'Judul Skripsi ' . ($index + 1),
+                    'topik' => 'Judul Skripsi Mahasiswa',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
