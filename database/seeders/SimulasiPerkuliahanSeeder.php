@@ -3,44 +3,46 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
 use App\Models\Kelompok;
 use App\Models\Jadwal;
+use App\Models\JadwalMahasiswa;
 use App\Models\Nilai;
 use App\Models\Absensi;
 use App\Models\Publikasi;
 use App\Models\Penelitian;
 use App\Models\Pengabdian;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+
+use App\Models\BimbinganMahasiswa;
+use App\Models\LogBimbinganMahasiswa;
+use App\Models\BimbinganKP;
+use App\Models\LogBimbinganKP;
+
+use App\Models\Pertemuan;
+use App\Models\BahanAjar;
+use App\Models\Penugasan;
+use App\Models\IsianPenugasanMahasiswa;
 
 class SimulasiPerkuliahanSeeder extends Seeder
 {
     public function run()
     {
         // Langkah 1: Buat Faker Dosen, Mahasiswa, dan Mata Kuliah
-        $dosen = Dosen::factory()->count(1)->create();         // 10 dosen
-        $mahasiswa = Mahasiswa::factory()->count(150)->create(); // 50 mahasiswa
+        $dosen = Dosen::factory()->count(10)->create();         // 10 dosen
+        $mahasiswa = Mahasiswa::factory()->count(150)->create(); // 150 mahasiswa
         $mataKuliah = MataKuliah::factory()->count(20)->create(); // 20 mata kuliah
 
-        // Langkah 2: Batasi Dosen Maksimal 16 SKS
+        // Langkah 2: Batasi Dosen Maksimal 16 SKS dan Tambahkan Perwalian
         $dosen->each(function ($dosen) use ($mataKuliah, $mahasiswa) {
-            // Buat 3 publikasi untuk setiap dosen
-            Publikasi::factory()->count(3)->create([
-                'id_dosen' => $dosen->id,
-            ]);
-
-            // Buat 2 penelitian untuk setiap dosen
-            Penelitian::factory()->count(2)->create([
-                'id_dosen' => $dosen->id,
-            ]);
-
-            // Buat 1 pengabdian untuk setiap dosen
-            Pengabdian::factory()->create([
-                'id_dosen' => $dosen->id,
-            ]);
+            // Tambahkan data terkait publikasi, penelitian, dan pengabdian
+            Publikasi::factory()->count(3)->create(['id_dosen' => $dosen->id]);
+            Penelitian::factory()->count(2)->create(['id_dosen' => $dosen->id]);
+            Pengabdian::factory()->create(['id_dosen' => $dosen->id]);
 
             // Langkah Perwalian: Assign 15 mahasiswa ke dosen sebagai wali
             $mahasiswaWali = $mahasiswa->random(15); // Pilih 15 mahasiswa secara acak
@@ -53,7 +55,7 @@ class SimulasiPerkuliahanSeeder extends Seeder
                     'updated_at' => now(),
                 ]);
             });
-            
+
             $totalSKS = 0;
             $kelompokList = [];
 
@@ -75,9 +77,7 @@ class SimulasiPerkuliahanSeeder extends Seeder
                 $kelompokList[] = $kelompok;
                 $totalSKS += $sks;
 
-                // Langkah 3: Buat Jadwal sesuai dengan jumlah SKS
-                // Jika 2 atau 3 SKS, buat hanya 1 jadwal
-                // Jika 4 SKS, buat 2 jadwal
+                // Langkah 3: Buat Jadwal
                 $jumlahJadwal = $sks == 4 ? 2 : 1;
 
                 $jadwalList = Jadwal::factory()->count($jumlahJadwal)->create([
@@ -86,60 +86,92 @@ class SimulasiPerkuliahanSeeder extends Seeder
                     'id_kelompok' => $kelompok->id,
                 ]);
 
-                // Langkah 4: Buat Nilai untuk Setiap Mahasiswa di Kelompok yang Dibuat
-                $kelompokCollection = collect($kelompokList);
+                // Langkah 4: Buat Pertemuan, Bahan Ajar, dan Penugasan
+                foreach ($jadwalList as $jadwal) {
+                    $pertemuanId = Pertemuan::insertGetId([
+                        'id_kelompok' => $kelompok->id,
+                        'minggu' => 'Minggu ke-' . rand(1, 14),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
 
-                $kelompokCollection->each(function ($kelompok) use ($mahasiswa) {
-                    $mahasiswaGroup = $mahasiswa->filter(function ($mahasiswa) {
-                        // Tambahkan properti `total_sks` jika belum ada
-                        if (!isset($mahasiswa->total_sks)) {
-                            $mahasiswa->total_sks = 0;
+                    // Buat Bahan Ajar untuk Pertemuan
+                    BahanAjar::insert([
+                        'id_kelompok' => $kelompok->id,
+                        'id_pertemuan' => $pertemuanId,
+                        'nama_bahan' => 'Bahan Ajar ' . rand(1, 10),
+                        'tipe_bahan' => ['Dokumen', 'Video', 'Lainnya'][rand(0, 2)],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    // Buat Penugasan untuk Pertemuan
+                    $penugasanId = Penugasan::insertGetId([
+                        'id_kelompok' => $kelompok->id,
+                        'id_pertemuan' => $pertemuanId,
+                        'nama_tugas' => 'Penugasan ' . rand(1, 10),
+                        'deskripsi' => 'Deskripsi penugasan ' . rand(1, 10),
+                        'tenggat' => Carbon::now()->addWeeks(rand(1, 3)),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    // Langkah 5: Buat Isian Penugasan Mahasiswa
+                    $mahasiswaKelompok = $mahasiswa->filter(function ($mhs) {
+                        // Mahasiswa hanya bisa mengikuti maksimal 20 SKS
+                        if (!isset($mhs->total_sks)) {
+                            $mhs->total_sks = 0;
                         }
-                        // Hanya pilih mahasiswa dengan total SKS kurang dari 20
-                        return $mahasiswa->total_sks < 20;
-                    })->random(rand(3, 5)); // Pilih mahasiswa acak, antara 3 sampai 5
-                
-                    $mahasiswaGroup->each(function ($mahasiswa) use ($kelompok) {
-                        $sks = $kelompok->mataKuliah->sks; // Ambil SKS dari mata kuliah di kelompok ini
-                
-                        // Pastikan penambahan SKS tidak melebihi 20
-                        if ($mahasiswa->total_sks + $sks <= 20) {
+                        return $mhs->total_sks < 20;
+                    })->random(rand(3, 10)); // Maksimal 10 mahasiswa per kelompok
+
+                    foreach ($mahasiswaKelompok as $mhs) {
+                        $sks = $kelompok->mataKuliah->sks;
+                        if ($mhs->total_sks + $sks <= 20) 
+                        {
                             // Buat nilai mahasiswa di kelompok tersebut
                             Nilai::factory()->create([
-                                'id_mahasiswa' => $mahasiswa->id,
+                                'id_mahasiswa' => $mhs->id,
                                 'id_kelompok' => $kelompok->id,
                             ]);
-                
-                            // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
-                            DB::table('jadwal_mahasiswa')->insert([
-                                'id_mahasiswa' => $mahasiswa->id,
-                                'id_kelompok' => $kelompok->id, // Simpan id_kelompok di tabel jadwal_mahasiswa
+
+                            IsianPenugasanMahasiswa::insert([
+                                'id_pertemuan' => $pertemuanId,
+                                'id_penugasan' => $penugasanId,
+                                'id_mahasiswa' => $mhs->id,
+                                'jawaban' => 'Jawaban mahasiswa ' . $mhs->nama,
+                                'nilai' => rand(60, 100),
+                                'tanggal_pengumpulan' => Carbon::now()->subDays(rand(0, 10)),
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ]);
-                
+
                             // Tambahkan SKS ke total mahasiswa
-                            $mahasiswa->total_sks += $sks;
+                            $mhs->total_sks += $sks;
+
+                            // Simpan relasi mahasiswa dan kelompok di tabel jadwal_mahasiswa
+                            JadwalMahasiswa::insert([
+                                'id_mahasiswa' => $mhs->id,
+                                'id_kelompok' => $kelompok->id,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
                         }
-                    });
-                });                
+                    }
+                }
             }
         });
 
-        // Langkah 5: Buat Absensi untuk Setiap Mahasiswa dan Jadwal yang Ada
+        // Langkah 6: Buat Absensi
         $mahasiswa->each(function ($mahasiswa) {
-            // Ambil jadwal acak
             $jadwal = Jadwal::inRandomOrder()->first(); 
-        
-            // Mulai dari tanggal tertentu, misalnya 1 Januari 2021
             $startDate = Carbon::create(2021, 1, 1);
-        
-            // Loop untuk membuat absensi 5 hingga 10 kali untuk tiap mahasiswa
+
             for ($i = 0; $i < rand(5, 10); $i++) {
                 Absensi::factory()->create([
                     'id_mahasiswa' => $mahasiswa->id,
                     'id_jadwal' => $jadwal->id,
-                    'tanggal' => $startDate->copy()->addWeeks($i), // Tambahkan minggu untuk setiap loop
+                    'tanggal' => $startDate->copy()->addWeeks($i),
                 ]);
             }
         });
@@ -150,7 +182,7 @@ class SimulasiPerkuliahanSeeder extends Seeder
 
             $bimbinganMahasiswa->each(function ($mhs) use ($dosen) {
                 // Buat bimbingan
-                $bimbinganId = DB::table('bimbingan')->insertGetId([
+                $bimbinganId = BimbinganMahasiswa::insertGetId([
                     'id_dosen' => $dosen->id,
                     'id_mahasiswa' => $mhs->id,
                     'topik' => 'Bimbingan Akademik',
@@ -160,7 +192,7 @@ class SimulasiPerkuliahanSeeder extends Seeder
 
                 // Buat log bimbingan
                 for ($i = 0; $i < rand(2, 5); $i++) {
-                    DB::table('log_bimbingan')->insert([
+                    LogBimbinganMahasiswa::insert([
                         'id_bimbingan' => $bimbinganId,
                         'catatan' => 'Pertemuan ke-' . ($i + 1),
                         'tanggal' => Carbon::now()->subWeeks($i),
@@ -177,17 +209,17 @@ class SimulasiPerkuliahanSeeder extends Seeder
 
             $bimbinganKPMahasiswa->each(function ($mhs) use ($dosen) {
                 // Buat bimbingan KP
-                $bimbinganKPId = DB::table('bimbingan_kp')->insertGetId([
+                $bimbinganKPId = BimbinganKP::insertGetId([
                     'id_dosen' => $dosen->id,
                     'id_mahasiswa' => $mhs->id,
-                    'judul' => 'Kerja Praktik',
+                    'topik' => 'Kerja Praktik',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
 
                 // Buat log bimbingan KP
                 for ($i = 0; $i < rand(2, 5); $i++) {
-                    DB::table('log_bimbingan_kp')->insert([
+                    LogBimbinganKP::insert([
                         'id_bimbingan_kp' => $bimbinganKPId,
                         'catatan' => 'Pertemuan KP ke-' . ($i + 1),
                         'tanggal' => Carbon::now()->subWeeks($i),

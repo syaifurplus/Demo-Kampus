@@ -10,7 +10,7 @@ class CreateLogBimbinganKPTable extends Migration
     {
         Schema::create('log_bimbingan_kp', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_bimbingan')->constrained('bimbingan_kp')->onDelete('cascade');
+            $table->foreignId('id_bimbingan_kp')->constrained('bimbingan_kp')->onDelete('cascade');
             $table->date('tanggal');
             $table->text('catatan');
             $table->timestamps();
