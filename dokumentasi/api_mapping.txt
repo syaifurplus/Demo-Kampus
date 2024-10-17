@@ -3,6 +3,18 @@ Dosen
 	- Publikasi
 	- Penelitian
 
+SELECT d.id AS dosen_id, d.nama AS dosen_nama, d.nip,
+       p.judul AS pengabdian_judul, p.tahun AS pengabdian_tahun,
+       pub.judul AS publikasi_judul, pub.jurnal AS publikasi_jurnal, pub.tahun AS publikasi_tahun,
+       pen.judul AS penelitian_judul, pen.tahun AS penelitian_tahun
+FROM dosen d
+LEFT JOIN pengabdian p ON p.id_dosen = d.id
+LEFT JOIN publikasi pub ON pub.id_dosen = d.id
+LEFT JOIN penelitian pen ON pen.id_dosen = d.id
+ORDER BY d.id;
+
+=============
+
 Dosen (present)
 	- Mata Kuliah
 		- Kelompok
@@ -15,14 +27,43 @@ Dosen (present)
 				- Mahasiswa
 					- Absensi
 
+=============
+
 Dosen
 	- Perwalian
+        - mahasiswa
+
+SELECT d.id AS dosen_id, d.nama AS dosen_nama, d.nip,
+       m.id AS mahasiswa_id, m.nama AS mahasiswa_nama, m.nim
+FROM dosen d
+JOIN perwalian pw ON pw.id_dosen = d.id
+JOIN mahasiswa m ON m.id = pw.id_mahasiswa
+ORDER BY d.id, m.id;
+
+=============
 
 Dosen
 	- Bimbingan Skripsi
-		- Log
+        - mahasiswa
+		    - Log
 	- Bimbingan KP
-		- Log
+		- mahasiswa
+            - Log
+
+SELECT d.id AS dosen_id, d.nama AS dosen_nama, d.nip,
+       bm.id AS bimbingan_id, bm.topik AS bimbingan_topik, m.nama AS mahasiswa_nama,
+       lbm.catatan AS log_bimbingan_catatan, lbm.tanggal AS log_bimbingan_tanggal,
+       bkp.id AS bimbingan_kp_id, bkp.topik AS bimbingan_kp_topik,
+       lbkp.catatan AS log_bimbingan_kp_catatan, lbkp.tanggal AS log_bimbingan_kp_tanggal
+FROM dosen d
+LEFT JOIN bimbingan_mahasiswa bm ON bm.id_dosen = d.id
+LEFT JOIN mahasiswa m ON bm.id_mahasiswa = m.id
+LEFT JOIN log_bimbingan_mahasiswa lbm ON lbm.id_bimbingan = bm.id
+LEFT JOIN bimbingan_kp bkp ON bkp.id_dosen = d.id AND bkp.id_mahasiswa = m.id
+LEFT JOIN log_bimbingan_kp lbkp ON lbkp.id_bimbingan_kp = bkp.id
+ORDER BY d.id, bm.id, bkp.id;
+
+=============
 
 Dosen
 	- Mata Kuliah
@@ -32,6 +73,24 @@ Dosen
 				- penugasan
 					- mahasiswa
 						- pengisian 
+
+SELECT d.id AS dosen_id, d.nama AS dosen_nama, d.nip,
+       mk.id AS matkul_id, mk.nama_matkul, mk.sks,
+       k.id AS kelompok_id, k.nama_kelompok,
+       p.id AS pertemuan_id, p.minggu,
+       ba.nama_bahan AS bahan_ajar_nama, ba.tipe_bahan AS bahan_ajar_tipe,
+       t.id AS penugasan_id, t.nama_tugas, t.deskripsi AS tugas_deskripsi, t.tenggat AS tugas_tenggat,
+       m.id AS mahasiswa_id, m.nama AS mahasiswa_nama, m.nim,
+       ipm.jawaban AS isian_jawaban, ipm.nilai AS isian_nilai, ipm.tanggal_pengumpulan AS isian_tanggal_pengumpulan
+FROM kampusmu_siakad.dosen d
+JOIN kampusmu_siakad.kelompok k ON k.id_dosen = d.id
+JOIN kampusmu_siakad.mata_kuliah mk ON mk.id = k.id_matkul
+JOIN kampusmu_lms.pertemuan p ON p.id_kelompok = k.id
+JOIN kampusmu_lms.bahan_ajar ba ON ba.id_pertemuan = p.id
+JOIN kampusmu_lms.penugasan t ON t.id_pertemuan = p.id
+JOIN kampusmu_lms.isian_penugasan_mahasiswa ipm ON ipm.id_penugasan = t.id
+JOIN kampusmu_siakad.mahasiswa m ON m.id = ipm.id_mahasiswa
+ORDER BY d.id, mk.id, k.id, p.id, ba.id, t.id, m.id;
 
 ========================================================						
 Dosen (lalu)
