@@ -132,13 +132,6 @@ class DosenController extends Controller
         });
         
         return $dosenData->values()->toArray();
-                    
-                    
-                    
-        
-
-
-
 
         return response()->json([
             'status' => true,
@@ -180,5 +173,275 @@ class DosenController extends Controller
             'message' => 'Dosen beserta relasi-relasinya berhasil diambil',
             'data' => $dosen
         ]);
+    }
+
+    public function penelitianPengabdian(){
+        $results = DB::table('dosen as d')
+            ->leftJoin('pengabdian as p', 'p.id_dosen', '=', 'd.id')
+            ->leftJoin('publikasi as pub', 'pub.id_dosen', '=', 'd.id')
+            ->leftJoin('penelitian as pen', 'pen.id_dosen', '=', 'd.id')
+            ->select(
+                'd.id as dosen_id', 
+                'd.nama as dosen_nama', 
+                'd.nip',
+                'p.judul as pengabdian_judul', 
+                'p.tahun as pengabdian_tahun',
+                'pub.judul as publikasi_judul', 
+                'pub.jurnal as publikasi_jurnal', 
+                'pub.tahun as publikasi_tahun',
+                'pen.judul as penelitian_judul', 
+                'pen.tahun as penelitian_tahun'
+            )
+            ->orderBy('d.id')
+            ->get();
+
+        // Format hasil ke dalam bentuk JSON yang diinginkan
+        $dosenData = $results->groupBy('dosen_id')->map(function ($dosenGroup) {
+            return [
+                'dosen_id' => $dosenGroup->first()->dosen_id,
+                'nama' => $dosenGroup->first()->dosen_nama,
+                'nip' => $dosenGroup->first()->nip,
+                'pengabdian' => $dosenGroup->filter(function ($item) {
+                    return !is_null($item->pengabdian_judul);
+                })->map(function ($item) {
+                    return [
+                        'judul' => $item->pengabdian_judul,
+                        'tahun' => $item->pengabdian_tahun,
+                    ];
+                })->values(),
+                'publikasi' => $dosenGroup->filter(function ($item) {
+                    return !is_null($item->publikasi_judul);
+                })->map(function ($item) {
+                    return [
+                        'judul' => $item->publikasi_judul,
+                        'jurnal' => $item->publikasi_jurnal,
+                        'tahun' => $item->publikasi_tahun,
+                    ];
+                })->values(),
+                'penelitian' => $dosenGroup->filter(function ($item) {
+                    return !is_null($item->penelitian_judul);
+                })->map(function ($item) {
+                    return [
+                        'judul' => $item->penelitian_judul,
+                        'tahun' => $item->penelitian_tahun,
+                    ];
+                })->values(),
+            ];
+        });
+
+        // Konversi hasil ke bentuk JSON array objek
+        return response()->json($dosenData->values());
+    }
+
+    public function perwalian(){
+        $results = DB::table('dosen as d')
+            ->join('perwalian as pw', 'pw.id_dosen', '=', 'd.id')
+            ->join('mahasiswa as m', 'm.id', '=', 'pw.id_mahasiswa')
+            ->select(
+                'd.id as dosen_id', 
+                'd.nama as dosen_nama', 
+                'd.nip',
+                'm.id as mahasiswa_id', 
+                'm.nama as mahasiswa_nama', 
+                'm.nim'
+            )
+            ->orderBy('d.id')
+            ->orderBy('m.id')
+            ->get();
+
+        // Format hasil ke dalam bentuk JSON yang diinginkan
+        $dosenData = $results->groupBy('dosen_id')->map(function ($dosenGroup) {
+            return [
+                'dosen_id' => $dosenGroup->first()->dosen_id,
+                'nama' => $dosenGroup->first()->dosen_nama,
+                'nip' => $dosenGroup->first()->nip,
+                'perwalian' => $dosenGroup->map(function ($item) {
+                    return [
+                        'mahasiswa_id' => $item->mahasiswa_id,
+                        'nama' => $item->mahasiswa_nama,
+                        'nim' => $item->nim,
+                    ];
+                })->values(),
+            ];
+        });
+
+        // Konversi hasil ke bentuk JSON array objek
+        return response()->json($dosenData->values());
+
+    }
+
+    public function bimbingan(){
+        $results = DB::table('dosen as d')
+            ->leftJoin('bimbingan_mahasiswa as bm', 'bm.id_dosen', '=', 'd.id')
+            ->leftJoin('mahasiswa as m', 'bm.id_mahasiswa', '=', 'm.id')
+            ->leftJoin('log_bimbingan_mahasiswa as lbm', 'lbm.id_bimbingan', '=', 'bm.id')
+            ->leftJoin('bimbingan_kp as bkp', function ($join) {
+                $join->on('bkp.id_dosen', '=', 'd.id')
+                    ->on('bkp.id_mahasiswa', '=', 'm.id');
+            })
+            ->leftJoin('log_bimbingan_kp as lbkp', 'lbkp.id_bimbingan_kp', '=', 'bkp.id')
+            ->select(
+                'd.id as dosen_id', 'd.nama as dosen_nama', 'd.nip',
+                'bm.id as bimbingan_id', 'bm.topik as bimbingan_topik', 'm.nama as mahasiswa_nama',
+                'lbm.catatan as log_bimbingan_catatan', 'lbm.tanggal as log_bimbingan_tanggal',
+                'bkp.id as bimbingan_kp_id', 'bkp.topik as bimbingan_kp_topik',
+                'lbkp.catatan as log_bimbingan_kp_catatan', 'lbkp.tanggal as log_bimbingan_kp_tanggal'
+            )
+            ->orderBy('d.id')
+            ->orderBy('bm.id')
+            ->orderBy('bkp.id')
+            ->get();
+
+            $dosenData = $results->groupBy('dosen_id')->map(function ($dosenGroup) {
+                // Bimbingan Skripsi
+                $bimbinganSkripsi = $dosenGroup->groupBy('bimbingan_id')->map(function ($bimbinganGroup) {
+                    // Mapping mahasiswa dan log bimbingan
+                    $mahasiswa = [
+                        'nama' => $bimbinganGroup->first()->mahasiswa_nama,
+                        'log' => $bimbinganGroup->map(function ($logItem) {
+                            return [
+                                'catatan' => $logItem->log_bimbingan_catatan,
+                                'tanggal' => $logItem->log_bimbingan_tanggal,
+                            ];
+                        })->filter()->values()->toArray(),
+                    ];
+            
+                    return [
+                        'id' => $bimbinganGroup->first()->bimbingan_id,
+                        'topik' => $bimbinganGroup->first()->bimbingan_topik,
+                        'mahasiswa' => $mahasiswa,
+                    ];
+                })->values()->toArray();
+            
+                // Bimbingan KP
+                $bimbinganKP = $dosenGroup->groupBy('bimbingan_kp_id')->map(function ($bimbinganKPGroup) {
+                    // Mapping log bimbingan KP
+                    $mahasiswa = [
+                        'nama' => $bimbinganKPGroup->first()->mahasiswa_nama,
+                        'log' => $bimbinganKPGroup->map(function ($logKPItem) {
+                            return [
+                                'catatan' => $logKPItem->log_bimbingan_kp_catatan,
+                                'tanggal' => $logKPItem->log_bimbingan_kp_tanggal,
+                            ];
+                        })->filter()->values()->toArray(),
+                    ];
+            
+                    return [
+                        'id' => $bimbinganKPGroup->first()->bimbingan_kp_id,
+                        'topik' => $bimbinganKPGroup->first()->bimbingan_kp_topik,
+                        'mahasiswa' => $mahasiswa,
+                    ];
+                })->values()->toArray();
+            
+                return [
+                    'id' => $dosenGroup->first()->dosen_id,
+                    'nama' => $dosenGroup->first()->dosen_nama,
+                    'nip' => $dosenGroup->first()->nip,
+                    'bimbingan_skripsi' => $bimbinganSkripsi,
+                    'bimbingan_kp' => $bimbinganKP,
+                ];
+            });
+            
+            // Menghasilkan format JSON
+            return $dosenData->values()->toArray();            
+    }
+
+    public function aktivitasPerkuliahan(){
+        $results = DB::table('dosen as d')
+            ->join('kelompok as k', 'k.id_dosen', '=', 'd.id')
+            ->join('mata_kuliah as mk', 'mk.id', '=', 'k.id_matkul')
+            ->join('jadwal as j', 'j.id_kelompok', '=', 'k.id')
+            ->join('mahasiswa as m', 'm.id', '=', 'j.id_mahasiswa') // Join mahasiswa sebelum nilai
+            ->join('nilai as n', function ($join) {
+                $join->on('n.id_kelompok', '=', 'k.id')
+                    ->on('n.id_mahasiswa', '=', 'm.id');
+            })
+            ->join('absensi as a', function ($join) {
+                $join->on('a.id_jadwal', '=', 'j.id')
+                    ->on('a.id_mahasiswa', '=', 'm.id');
+            })
+            ->select(
+                'd.id as dosen_id', 'd.nama as dosen_nama', 'd.nip',
+                'mk.id as matkul_id', 'mk.nama_matkul', 'mk.sks',
+                'k.id as kelompok_id', 'k.nama_kelompok',
+                'n.id as nilai_id', 'n.nilai_tugas_akhir', 'n.nilai_uts', 'n.nilai_uas',
+                'm.id as mahasiswa_id', 'm.nama as mahasiswa_nama', 'm.nim',
+                'j.id as jadwal_id', 'j.hari', 'j.jam_mulai', 'j.jam_selesai',
+                'a.tanggal as absensi_tanggal', 'a.status as absensi_status'
+            )
+            ->orderBy('d.id')
+            ->orderBy('mk.id')
+            ->orderBy('k.id')
+            ->orderBy('j.id')
+            ->orderBy('m.id')
+            ->orderBy('a.tanggal')
+            ->get();
+
+
+        // Format data ke dalam bentuk JSON yang sesuai
+        $dosenData = $results->groupBy('dosen_id')->map(function ($dosenGroup) {
+            $mataKuliahData = $dosenGroup->groupBy('matkul_id')->map(function ($matkulGroup) {
+                $kelompokData = $matkulGroup->groupBy('kelompok_id')->map(function ($kelompokGroup) {
+                    $nilaiData = $kelompokGroup->groupBy('nilai_id')->map(function ($nilaiGroup) {
+                        return [
+                            'tugas_akhir' => $nilaiGroup->first()->nilai_tugas_akhir,
+                            'uts' => $nilaiGroup->first()->nilai_uts,
+                            'uas' => $nilaiGroup->first()->nilai_uas,
+                        ];
+                    });
+
+                    $jadwalData = $kelompokGroup->groupBy('jadwal_id')->map(function ($jadwalGroup) {
+                        $mahasiswaData = $jadwalGroup->groupBy('mahasiswa_id')->map(function ($mahasiswaGroup) {
+                            $absensiData = $mahasiswaGroup->map(function ($item) {
+                                return [
+                                    'tanggal' => $item->absensi_tanggal,
+                                    'status' => $item->absensi_status,
+                                ];
+                            });
+
+                            return [
+                                'id' => $mahasiswaGroup->first()->mahasiswa_id,
+                                'nama' => $mahasiswaGroup->first()->mahasiswa_nama,
+                                'nim' => $mahasiswaGroup->first()->nim,
+                                'absensi' => $absensiData->toArray(),
+                            ];
+                        });
+
+                        return [
+                            'id' => $jadwalGroup->first()->jadwal_id,
+                            'hari' => $jadwalGroup->first()->hari,
+                            'jam_mulai' => $jadwalGroup->first()->jam_mulai,
+                            'jam_selesai' => $jadwalGroup->first()->jam_selesai,
+                            'mahasiswa' => $mahasiswaData->values()->toArray(),
+                        ];
+                    });
+
+                    return [
+                        'id' => $kelompokGroup->first()->kelompok_id,
+                        'nama_kelompok' => $kelompokGroup->first()->nama_kelompok,
+                        'nilai' => $nilaiData->values()->toArray(),
+                        'jadwal' => $jadwalData->values()->toArray(),
+                    ];
+                });
+
+                return [
+                    'id' => $matkulGroup->first()->matkul_id,
+                    'nama_matkul' => $matkulGroup->first()->nama_matkul,
+                    'sks' => $matkulGroup->first()->sks,
+                    'kelompok' => $kelompokData->values()->toArray(),
+                ];
+            });
+
+            return [
+                'id' => $dosenGroup->first()->dosen_id,
+                'nama' => $dosenGroup->first()->dosen_nama,
+                'nip' => $dosenGroup->first()->nip,
+                'mata_kuliah' => $mataKuliahData->values()->toArray(),
+            ];
+        });
+
+        // Mengembalikan hasil dalam bentuk JSON
+        return $dosenData->values()->toArray();
+
     }
 }

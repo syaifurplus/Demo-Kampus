@@ -27,6 +27,22 @@ Dosen (present)
 				- Mahasiswa
 					- Absensi
 
+SELECT d.id AS dosen_id, d.nama AS dosen_nama, d.nip,
+       mk.id AS matkul_id, mk.nama_matkul, mk.sks,
+       k.id AS kelompok_id, k.nama_kelompok,
+       n.id AS nilai_id, n.nilai_tugas_akhir, n.nilai_uts, n.nilai_uas,
+       m.id AS mahasiswa_id, m.nama AS mahasiswa_nama, m.nim,
+       j.id AS jadwal_id, j.hari, j.jam_mulai, j.jam_selesai,
+       a.tanggal AS absensi_tanggal, a.status AS absensi_status
+FROM dosen d
+JOIN kelompok k ON k.id_dosen = d.id
+JOIN mata_kuliah mk ON mk.id = k.id_matkul
+JOIN jadwal j ON j.id_kelompok = k.id
+JOIN nilai n ON n.id_kelompok = k.id
+JOIN mahasiswa m ON n.id_mahasiswa = m.id
+JOIN absensi a ON a.id_jadwal = j.id AND a.id_mahasiswa = m.id
+ORDER BY d.id, mk.id, k.id, j.id, m.id, a.tanggal;
+
 =============
 
 Dosen
